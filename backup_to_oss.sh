@@ -26,14 +26,21 @@ SOURCE_EXCLUDE=`validate_source $SOURCE_EXCLUDE`
 if [ "${METHOD}" != "tar" -a -z "$(command -v zip)" ]
 then
   echo "Install zip first!"
-  echo "yum install -y zip"
+  echo "sudo yum install -y zip"
   exit 1
 fi
+
+if [ -z "$(command -v xmllint)" ]
+then
+  echo "Install xmllint first!"
+  echo "sudo yum install -y zip"
+  echo "sudo apt install libxml2-utils"
+  exit 1
+fi
+
 CMD_IP=`which ip`
 CMD_ZIP=`which zip`
 CMD_TAR=`which tar`
-
-
 
 
 function get_oss_dir() {

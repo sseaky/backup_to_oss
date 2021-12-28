@@ -2,10 +2,11 @@
 
 打包、加密、上传、自动清理
 
-在centos7上测试，需先安装zip 
+在centos7和Ubuntu 18上测试，需先安装zip 和 xmllint
 
 ```
-yum install -y zip
+sudo yum install -y zip
+sudo apt install libxml2-utils
 ```
 
 
