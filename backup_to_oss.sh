@@ -5,13 +5,6 @@
 CONFIGFILE="$(dirname $(readlink -f "$0"))/config.sh"
 source $CONFIGFILE
 
-if [ "${METHOD}" != "tar" -a -z "$(command -v zip)" ]
-then
-  echo "Install zip first!"
-  echo "yum install -y zip"
-  exit 1
-fi
-
 LotageBackupSeconds=$((${LotageBackupDays}*86400))
 [ "$METHOD" = "tar" ] &&  ballfile=${BackupFileStem}_$(date +%y%m%d%H%M%S).tar.gz \
   || ballfile=${BackupFileStem}_$(date +%y%m%d%H%M%S).zip
@@ -30,11 +23,23 @@ SOURCE="$(echo "$CONFIGFILE $SOURCE $*" | xargs)"
 SOURCE="$StatusFile `validate_source $SOURCE`"
 SOURCE_EXCLUDE=`validate_source $SOURCE_EXCLUDE`
 
+if [ "${METHOD}" != "tar" -a -z "$(command -v zip)" ]
+then
+  echo "Install zip first!"
+  echo "yum install -y zip"
+  exit 1
+fi
+CMD_IP=`which ip`
+CMD_ZIP=`which zip`
+CMD_TAR=`which tar`
+
+
+
 
 function get_oss_dir() {
   # ip -o route get <8.8.8.8>
   # centos6 /sbin/ip, print $4
-  default_adapter=`/usr/sbin/ip route show to match 0.0.0.0 | sed -r "s/^.*dev ([^ ]+) .*$/\1/"`
+  default_adapter=`$CMD_IP route show to match 0.0.0.0 | sed -r "s/^.*dev ([^ ]+) .*$/\1/"`
   myip=`/sbin/ifconfig $default_adapter | awk -F ' *|:' '/inet /{print $3}'`
   [ -n "$Client" ] || Client="$(hostname)_${myip}"
 }
@@ -54,14 +59,14 @@ function save_status() {
   shell_execute hostname >> $StatusFile
   shell_execute mount >> $StatusFile
   shell_execute df -h >> $StatusFile
-  shell_execute ip a >> $StatusFile
-  shell_execute ip route >> $StatusFile
+  shell_execute $CMD_IP a >> $StatusFile
+  shell_execute $CMD_IP route >> $StatusFile
   shell_execute sudo iptables-save >> $StatusFile
 }
 
 function pack_them() {
   if [ "$METHOD" = "tar" ]; then
-    cmd="/bin/tar"
+    cmd="$CMD_TAR"
     if [ -n "$SOURCE_EXCLUDE" ]
     then
       for x in $SOURCE_EXCLUDE; do
@@ -70,7 +75,7 @@ function pack_them() {
     fi
     cmd=${cmd}" -zvcf ${ballfile} ${SOURCE}"
   else
-    cmd="/bin/zip -r -9 -P ${PASSWORD} ${ballfile} $SOURCE"
+    cmd="$CMD_ZIP -r -9 -P ${PASSWORD} ${ballfile} $SOURCE"
     if [ -n "$SOURCE_EXCLUDE" ]; then
       cmd="$cmd -x"
       # zip exclude必须以\\\*结尾，才不会包含空目录，如 /path/to/log/\\\*
