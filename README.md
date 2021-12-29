@@ -20,10 +20,10 @@ vi config.sh
 
 
 
-备份的文件或目录，可以在config.sh中的$SOURCE中设置，以空格或换行分割，也可以参数方式写在命令行
+备份的文件或目录，在config.sh中的${SOURCE}中设置，以空格或换行分割，可以在${SOURCE_EXCLUDE}设置要排除的项，目录以"/"结尾
 
 ```
-bash backup_to_oss.sh [file1] [dir1]
+bash backup_to_oss.sh
 ```
 
 
@@ -32,6 +32,18 @@ bash backup_to_oss.sh [file1] [dir1]
 
 ```
 0 0 * * * cd <path>/backup_to_oss && bash backup_to_oss.sh
+```
+
+
+
+## 2021.12.29
+
+增加list和get功能
+
+```
+Do  :  backup_to_oss.sh
+List:  backup_to_oss.sh list
+Get :  backup_to_oss.sh get <obj>
 ```
 
 
