@@ -35,7 +35,7 @@ fi
 
 # centos6上的xmllint 20706 没有--xpath参数
 xmllint_version=`xmllint --version 2>&1 | grep -oE "(version .*)" | cut -d" " -f2`
-if [ -z "$xmllint_version" -o $xmllint_version -lt 20900 ]; then
+if [ ${xmllint_version:-0} -lt 20900 ]; then
   XML_DISABLE=true
   info "WARN: xmllint is not available!"
 else
