@@ -33,23 +33,24 @@ then
   exit 1
 fi
 
-if [ -z "$(command -v xmllint)" ]
-then
-  echo "Install xmllint first!"
-  echo "sudo yum install -y zip"
-  echo "sudo apt install libxml2-utils"
-  exit 1
+# centos6上的xmllint 20706 没有--xpath参数
+xmllint_version=`xmllint --version 2>&1 | grep -oE "(version .*)" | cut -d" " -f2`
+if [ -z "$xmllint_version" -o $xmllint_version -lt 20900 ]; then
+  XML_DISABLE=true
+  info "WARN: xmllint is not available!"
+else
+  XML_DISABLE=false
 fi
 
 CMD_IP=`which ip`
-CMD_ZIP=`which zip`
-CMD_TAR=`which tar`
 
 function get_oss_dir() {
   # ip -o route get <8.8.8.8>
   # centos6 /sbin/ip, print $4
   default_adapter=`$CMD_IP route show to match 0.0.0.0 | sed -r "s/^.*dev ([^ ]+) .*$/\1/"`
-  myip=`/sbin/ifconfig $default_adapter | awk -F ' *|:' '/inet /{print $3}'`
+  # centos6   inet addr:127.0.0.1  Mask:255.0.0.0
+  # centos7   inet 127.0.0.1  netmask 255.0.0.0
+  myip=`/sbin/ifconfig $default_adapter | awk -F ' *|:' '/inet /{print $0}' | sed -r "s/^.*inet ([^ ]+) .*$/\1/" | sed "s/addr://"`
   [ -n "$Client" ] || Client="$(hostname)_${myip}"
 }
 get_oss_dir
@@ -75,16 +76,16 @@ function save_status() {
 
 function pack_them() {
   if [ "$METHOD" = "tar" ]; then
-    cmd="$CMD_TAR"
+    cmd="tar"
     if [ -n "$SOURCE_EXCLUDE" ]
     then
       for x in $SOURCE_EXCLUDE; do
-        cmd=${cmd}" --exclude=$x"
+        cmd=${cmd}" --exclude='$x'"
       done
     fi
     cmd=${cmd}" -zvcf ${ballfile} ${SOURCE}"
   else
-    cmd="$CMD_ZIP -r -9 -P ${PASSWORD} ${ballfile} $SOURCE"
+    cmd="zip -r -9 -P ${PASSWORD} ${ballfile} $SOURCE"
     if [ -n "$SOURCE_EXCLUDE" ]; then
       cmd="$cmd -x"
       # zip exclude必须以\\\*结尾，才不会包含空目录，如 /path/to/log/\\\*
@@ -129,7 +130,7 @@ function oss_execute() {
     info "Save to $3"
   else
     resp=`eval $cmd`
-    [ -n "$resp" ] && ( echo $resp | xmllint --format - )
+    $XML_DISABLE || ([ -n "$resp" ] && ( echo $resp | xmllint --format - ))
   fi
 }
 
@@ -138,6 +139,7 @@ function oss_buckets_list() {
 }
 
 function oss_bucket_create() {
+  $XML_DISABLE && return
   buckets=`oss_buckets_list | xmllint --xpath "//*[local-name()='Bucket']/*[local-name()='Name']" - | sed "s/<\/*Name>/ /g" | xargs`
   if [[ ! " ${buckets[*]} " =~ " $1 " ]]
   then
@@ -191,6 +193,7 @@ function backup_query() {
 }
 
 function backup_list(){
+  $XML_DISABLE && return
   backup_query
   for i in $(seq 0 $((${Backups_len}-1))); do
     printf "$(($i+1))\t${Backups_time[$i]}\t${Backups_key[$i]}\n"
@@ -199,6 +202,7 @@ function backup_list(){
 
 # auto clean old objects
 function oss_clean_by_time() {
+  $XML_DISABLE && return
   info "Clean backups before $LotageBackupDays days"
   backup_query
   nowstamp=`date +%s`

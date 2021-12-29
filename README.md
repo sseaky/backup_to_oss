@@ -9,6 +9,8 @@ sudo yum install -y zip
 sudo apt install libxml2-utils
 ```
 
+centos6虽然有xmllint ，但版本 20706 比较低，不支持--xpath参数，可以在config.sh中设置xmllint_disable=false，关掉xml解析功能，相关的list功能会使用不了，备份功能不影响。
+
 
 
 复制config_example.sh为config.sh，并修改

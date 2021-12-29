@@ -22,5 +22,5 @@ StatusFile="/tmp/myStatus.txt"
 SOURCE="
 /etc/hosts
 "
-# 排除目录，目录必须以 / 结尾，否则有可能匹配错误
+# 排除目录，zip时目录必须以 / 结尾，否则有可能匹配错误，tar时不需要/
 SOURCE_EXCLUDE=""
