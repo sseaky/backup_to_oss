@@ -2,6 +2,8 @@
 # @Author: Seaky
 # @Date:   2021/12/22 17:17
 
+export PATH=$PATH:/usr/sbin/
+
 CONFIGFILE="$(dirname $(readlink -f "$0"))/config.sh"
 source $CONFIGFILE
 
@@ -42,12 +44,10 @@ else
   XML_DISABLE=false
 fi
 
-CMD_IP=`which ip`
-
 function get_oss_dir() {
   # ip -o route get <8.8.8.8>
   # centos6 /sbin/ip, print $4
-  default_adapter=`$CMD_IP route show to match 0.0.0.0 | sed -r "s/^.*dev ([^ ]+) .*$/\1/"`
+  default_adapter=`ip route show to match 0.0.0.0 | sed -r "s/^.*dev ([^ ]+) .*$/\1/"`
   # centos6   inet addr:127.0.0.1  Mask:255.0.0.0
   # centos7   inet 127.0.0.1  netmask 255.0.0.0
   myip=`/sbin/ifconfig $default_adapter | awk -F ' *|:' '/inet /{print $0}' | sed -r "s/^.*inet ([^ ]+) .*$/\1/" | sed "s/addr://"`
@@ -69,8 +69,8 @@ function save_status() {
   shell_execute hostname >> $StatusFile
   shell_execute mount >> $StatusFile
   shell_execute df -h >> $StatusFile
-  shell_execute $CMD_IP a >> $StatusFile
-  shell_execute $CMD_IP route >> $StatusFile
+  shell_execute ip a >> $StatusFile
+  shell_execute ip route >> $StatusFile
   shell_execute sudo iptables-save >> $StatusFile
 }
 

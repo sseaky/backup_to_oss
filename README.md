@@ -38,6 +38,12 @@ bash backup_to_oss.sh
 
 
 
+## 2021.12.30
+
+fix cron中找不到ip命令的问题
+
+
+
 ## 2021.12.29
 
 增加list和get功能
