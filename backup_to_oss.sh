@@ -2,7 +2,7 @@
 # @Author: Seaky
 # @Date:   2021/12/22 17:17
 
-export PATH=$PATH:/usr/sbin/
+export PATH=$PATH:/sbin/:/usr/sbin/
 
 CONFIGFILE="$(dirname $(readlink -f "$0"))/config.sh"
 source $CONFIGFILE
