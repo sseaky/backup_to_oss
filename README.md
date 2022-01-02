@@ -38,9 +38,9 @@ bash backup_to_oss.sh
 
 
 
-## 2021.12.30
+## 2021.12.31
 
-fix cron中找不到ip命令的问题
+增加export PATH，因为发现ip命令在不同的版本位置不一样，在cron中执行会找不到命令
 
 
 
