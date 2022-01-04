@@ -2,6 +2,10 @@
 
 打包、加密、上传、自动清理
 
+备份文件默认为zip方式，加密，上传路径默认为 <bucket>/<hostname>\_<ip>/\_autobackup_yymmddHHMMSS.zip
+
+
+
 在centos7和Ubuntu 18上测试，需先安装zip 和 xmllint
 
 ```
