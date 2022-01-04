@@ -9,9 +9,15 @@ sudo yum install -y zip
 sudo apt install libxml2-utils
 ```
 
-centos6虽然有xmllint ，但版本 20706 比较低，不支持--xpath参数，可以在config.sh中设置xmllint_disable=false，关掉xml解析功能，相关的list功能会使用不了，备份功能不影响。
+centos6虽然有xmllint ，但版本 20706 比较低，不支持--xpath参数，~~可以在config.sh中设置xmllint_disable=false，关掉xml解析功能，相关的list功能会使用不了，备份功能不影响。~~
 
+改为自动判断xmllint版本，决定是否解析。
 
+# 使用
+
+```
+git clone https://github.com/sseaky/backup_to_oss.git && cd backup_to_oss
+```
 
 复制config_example.sh为config.sh，并修改
 
@@ -20,15 +26,11 @@ cp config_example.sh config.sh
 vi config.sh
 ```
 
-
-
-备份的文件或目录，在config.sh中的${SOURCE}中设置，以空格或换行分割，可以在${SOURCE_EXCLUDE}设置要排除的项，目录以"/"结尾
+需要备份的文件或目录，在config.sh中的${SOURCE}中设置，以空格或换行分割，可以在${SOURCE_EXCLUDE}设置要排除的项，排除目录，使用zip时目录必须以 / 结尾，否则有可能匹配错误，使用tar时不需要/
 
 ```
 bash backup_to_oss.sh
 ```
-
-
 
 每天备份，使用crontab
 
