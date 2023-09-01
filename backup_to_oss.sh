@@ -47,7 +47,7 @@ fi
 function get_oss_dir() {
   # ip -o route get <8.8.8.8>
   # centos6 /sbin/ip, print $4
-  default_adapter=`ip route show to match 0.0.0.0 | sed -r "s/^.*dev ([^ ]+) .*$/\1/"`
+  default_adapter=`ip route show to match 0.0.0.0 | sed -r "s/^.*dev ([^ ]+) .*$/\1/" | sort | uniq`
   # centos6   inet addr:127.0.0.1  Mask:255.0.0.0
   # centos7   inet 127.0.0.1  netmask 255.0.0.0
   myip=`/sbin/ifconfig $default_adapter | awk -F ' *|:' '/inet /{print $0}' | sed -r "s/^.*inet ([^ ]+) .*$/\1/" | sed "s/addr://"`
@@ -85,7 +85,7 @@ function pack_them() {
     fi
     cmd=${cmd}" -zvcf ${ballfile} ${SOURCE}"
   else
-    cmd="zip -r -9 -P ${PASSWORD} ${ballfile} $SOURCE"
+    cmd="zip -r -9 -P ${ZIP_PASSWORD} ${ballfile} $SOURCE"
     if [ -n "$SOURCE_EXCLUDE" ]; then
       cmd="$cmd -x"
       # zip exclude必须以\\\*结尾，才不会包含空目录，如 /path/to/log/\\\*
@@ -224,18 +224,19 @@ function backup() {
 function main() {
   action=$1
   obj=$2
-  if [ "$action" = "" ]; then
+  if [ "$action" = "do" ]; then
     backup
   elif [ "$action" = "list" ]; then
     backup_list
   elif [ "$action" = "get" ]; then
     oss_object_get $BUCKET $obj
-  else
-    echo "Wrong action!"
-    echo "Do  :  $(basename $0)"
-    echo "List:  $(basename $0) list"
-    echo "Get :  $(basename $0) get <obj>"
+  elif [ "$action" = "help" ]; then
+    echo "Do  :  ${FILENAME} do"
+    echo "List:  ${FILENAME} list"
+    echo "Get :  ${FILENAME} get <obj>"
   fi
 }
+
+FILENAME=$(basename $0)
 
 main $*
